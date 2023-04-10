@@ -16,5 +16,5 @@ test('Devo saber trabalhar com objetos', () => {
   expect(obj.name).toBe('Jonh');
   const obj2 = { name: 'Jonh', email: 'jonh@gmail.com' };
   expect(obj2).toEqual(obj2);
-  expect(obj).toBe(obj); 
+  expect(obj).toBe(obj);
 });
