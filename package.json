@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint src/** test/** --fix"
+    "lint": "eslint src/** test/** --fix",
+    "start": "node src/server.js",
+    "secure-mode": "jest --watch --verbose=true"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +20,6 @@
     "supertest": "3.3.0"
   },
   "dependencies": {
-    "express": "4.16.4"
+    "express": "^4.18.2"
   }
 }

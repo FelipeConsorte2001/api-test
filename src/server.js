@@ -1,7 +1,3 @@
-const express = require('express')
-const app = express()
-app.get('/', (req, res) => {
-    res.status(200).send();
-})
+const app = require('./app');
 
-app.listen(3001, () => console.log(`Server start port: 3001`))
+app.listen(3001, () => console.log('Server start port: 3001'));
