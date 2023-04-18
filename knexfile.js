@@ -1,3 +1,5 @@
+require('dotenv/config');
+
 module.exports = {
   test: {
     client: 'pg',
@@ -5,7 +7,7 @@ module.exports = {
     connection: {
       host: 'localhost',
       user: 'postgres',
-      password: 'Postgres2019!',
+      password: process.env.SENHA_DB,
       database: 'barriga',
     },
     migration: {
