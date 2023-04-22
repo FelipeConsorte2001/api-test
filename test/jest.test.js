@@ -1,4 +1,4 @@
-test('I must know the main assertions of jest', () => {
+test("I must know the main assertions of jest", () => {
   let number = null;
   expect(number).toBeNull();
   number = 10;
@@ -9,12 +9,12 @@ test('I must know the main assertions of jest', () => {
   expect(number).toBeLessThan(11);
 });
 
-test('must know how to work with objects', () => {
-  const obj = { name: 'Jonh', email: 'jonh@gmail.com' };
-  expect(obj).toHaveProperty('name');
-  expect(obj).toHaveProperty('name', 'Jonh');
-  expect(obj.name).toBe('Jonh');
-  const obj2 = { name: 'Jonh', email: 'jonh@gmail.com' };
+test("must know how to work with objects", () => {
+  const obj = { name: "Jonh", email: "jonh@gmail.com" };
+  expect(obj).toHaveProperty("name");
+  expect(obj).toHaveProperty("name", "Jonh");
+  expect(obj.name).toBe("Jonh");
+  const obj2 = { name: "Jonh", email: "jonh@gmail.com" };
   expect(obj2).toEqual(obj2);
   expect(obj).toBe(obj);
 });
