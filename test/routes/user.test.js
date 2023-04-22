@@ -2,6 +2,7 @@ const request = require('supertest');
 
 const app = require('../../src/app');
 
+const mail = `${Date.now()}@gmail.com`;
 test('Deve listar todos os usários', () => {
   return request(app).get('/users').then((res) => {
     expect(res.status).toBe(200);
@@ -9,14 +10,12 @@ test('Deve listar todos os usários', () => {
   });
 });
 test('Deve inserir usuário com sucesso', () => {
-  const mail = `${Date.now()}@gmail.com`;
   return request(app).post('/users').send({ name: 'felipearaujo3', mail, passwd: 'felipearaujo3' }).then((res) => {
     expect(res.status).toBe(201);
     expect(res.body.name).toBe('felipearaujo3');
   });
 });
 test('Não deve inserir um usuario sem nome', () => {
-  const mail = `${Date.now()}@gmail.com`;
   return request(app).post('/users').send({ mail, passwd: '123456' }).then((res) => {
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Nome é um atributo obrigatorio');
@@ -32,5 +31,11 @@ test('Não deve inserir um usuario sem senha', (done) => {
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Senha é um atributo obrigatorio');
     done();
+  });
+});
+test('Não deve inserir um usuario com email existente', () => {
+  return request(app).post('/users').send({ name: 'felipearaujo3', mail, passwd: 'felipearaujo3' }).then((res) => {
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Já existe um usuario com esse email');
   });
 });
