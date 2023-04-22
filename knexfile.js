@@ -7,11 +7,11 @@ module.exports = {
     connection: {
       host: 'localhost',
       user: 'postgres',
-      password: process.env.SENHA_DB,
+      password: process.env.PASSWORD_DB,
       database: 'barriga',
     },
     migration: {
-      directory: 'src/migrations',
+      directory: 'migrations',
     },
   },
 };

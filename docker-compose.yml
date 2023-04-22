@@ -4,7 +4,7 @@ services:
   postgres-compose:
     image: postgres
     environment:
-      POSTGRES_PASSWORD: "${SENHA_DB}"
+      POSTGRES_PASSWORD: "${PASSWORD_DB}"
     ports:
       - "5432:5432"
     volumes:
@@ -16,7 +16,7 @@ services:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: "${EMAIL_PG}"
-      PGADMIN_DEFAULT_PASSWORD: "${SENHA_PG}"
+      PGADMIN_DEFAULT_PASSWORD: "${PASSWORD_PG}"
     ports:
       - "16543:80"
     depends_on:
