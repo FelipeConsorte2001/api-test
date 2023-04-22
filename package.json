@@ -7,7 +7,7 @@
     "test": "jest",
     "lint": "eslint src/** test/** --fix",
     "start": "node src/server.js",
-    "secure-mode": "jest --watch --verbose=true"
+    "secure-mode": "jest --watch --verbose=false"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "knex": "^2.4.2",
+    "knex-logger": "^0.1.0",
     "pg": "^8.10.0"
   }
 }
