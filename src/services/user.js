@@ -7,7 +7,7 @@ module.exports = (app) => {
     if (!user.mail) return { error: 'Email is a mandatory attribute' };
     if (!user.passwd) return { error: 'Password is a mandatory attribute' };
     const userDb = await findAll({ mail: user.mail });
-    if (userDb && userDb.length > 0) return { error: 'There is already a user with this email address' };
+    if (userDb && userDb.length > 0) { return { error: 'There is already a user with this email address' }; }
     return app.db('users').insert(user, '*');
   };
   return { findAll, save };
