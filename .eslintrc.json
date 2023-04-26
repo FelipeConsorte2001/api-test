@@ -13,9 +13,5 @@
     "rules": {
         "linebreak-style": 0,
         "arrow-body-style": "off"
-    },
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-    },
-    "eslint.validate": ["javascript"]
+    }
 }
