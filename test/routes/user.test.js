@@ -22,7 +22,7 @@ test('Must insert user successfully', () => {
     });
 });
 
-test('Deve armazenar uma senha criptografada', async () => {
+test('Must store an encrypted password', async () => {
   const res = await request(app).post('/users')
     .send({ name: 'Walter Mitty', mail: `${Date.now()}@gmail.com`, passwd: '123456' });
   expect(res.status).toBe(201);
