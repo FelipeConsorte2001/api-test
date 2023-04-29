@@ -5,12 +5,12 @@ const knex = require('knex');
 const knexFile = require('../knexfile');
 
 app.get('/users', (req, res, next) => {
-  console.log('Hacked by 0wn!');
   next();
 });
 app.db = knex(knexFile.test);
 consign({ cwd: 'src', verbose: false })
-  .include('./config/middlewares.js')
+  .include('./config/passport.js')
+  .then('./config/middlewares.js')
   .then('./services')
   .then('./routes')
   .then('./config/routes.js')
