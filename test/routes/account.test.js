@@ -1,4 +1,5 @@
 const request = require('supertest');
+const jwt = require('jwt-simple');
 
 const app = require('../../src/app');
 
@@ -12,11 +13,13 @@ beforeAll(async () => {
     passwd: '123456',
   });
   user = { ...res[0] };
+  user.token = jwt.encode(user, process.env.SECRET);
 });
 
 test('You must successfully enter an account', () => {
   return request(app)
     .post(MAIN_ROUTE)
+    .set('Authorization', `bearer ${user.token}`)
     .send({ name: 'Acc #1', user_id: user.id })
     .then((result) => {
       expect(result.status).toBe(201);
@@ -26,6 +29,7 @@ test('You must successfully enter an account', () => {
 test('you must not enter an account without a name ', () => {
   return request(app)
     .post(MAIN_ROUTE)
+    .set('Authorization', `bearer ${user.token}`)
     .send({ user_id: user.id })
     .then((result) => {
       expect(result.status).toBe(400);
@@ -35,7 +39,8 @@ test('you must not enter an account without a name ', () => {
 
 test('Must list all accounts', () => {
   return app.db('accounts').insert({ name: 'Acc list', user_id: user.id })
-    .then(() => request(app).get(MAIN_ROUTE))
+    .then(() => request(app).get(MAIN_ROUTE)
+      .set('Authorization', `bearer ${user.token}`))
     .then((res) => {
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThan(0);
@@ -44,7 +49,8 @@ test('Must list all accounts', () => {
 test('Must list a accounts by id', () => {
   return app.db('accounts')
     .insert({ name: 'Acc by Id', user_id: user.id }, ['id'])
-    .then((acc) => request(app).get(`${MAIN_ROUTE}/${acc[0].id}`))
+    .then((acc) => request(app).get(`${MAIN_ROUTE}/${acc[0].id}`)
+      .set('Authorization', `bearer ${user.token}`))
     .then((res) => {
       expect(res.status).toBe(200);
       expect(res.body.name).toBe('Acc by Id');
@@ -55,6 +61,7 @@ test('Should I change an account', () => {
   return app.db('accounts')
     .insert({ name: 'Acc To Update', user_id: user.id }, ['id'])
     .then((acc) => request(app).put(`${MAIN_ROUTE}/${acc[0].id}`)
+      .set('Authorization', `bearer ${user.token}`)
       .send({ name: 'Acc updated' }))
     .then((res) => {
       expect(res.status).toBe(200);
@@ -64,7 +71,8 @@ test('Should I change an account', () => {
 test('Should I remove an account', () => {
   return app.db('accounts')
     .insert({ name: 'Acc To remove', user_id: user.id }, ['id'])
-    .then((acc) => request(app).delete(`${MAIN_ROUTE}/${acc[0].id}`))
+    .then((acc) => request(app).delete(`${MAIN_ROUTE}/${acc[0].id}`)
+      .set('Authorization', `bearer ${user.token}`))
     .then((res) => {
       expect(res.status).toBe(204);
     });
