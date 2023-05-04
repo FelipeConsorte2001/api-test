@@ -43,7 +43,7 @@ test('You should not enter a user with the wrong password', () => {
     });
 });
 test('Must not access a protected route without a token', () => {
-  return request(app).get('/users')
+  return request(app).get('/v1/users')
     .then((res) => {
       expect(res.status).toBe(401);
     });
