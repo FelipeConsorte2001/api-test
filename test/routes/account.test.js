@@ -85,7 +85,7 @@ test('Should I remove an account', () => {
     });
 });
 
-test('Deve listar apenas as contas do usuario', () => {
+test('Should list only user accounts', () => {
   return app.db('accounts').insert([
     { name: 'Acc User #1', user_id: user.id },
     { name: 'Acc User #2', user_id: user2.id },
@@ -96,4 +96,44 @@ test('Deve listar apenas as contas do usuario', () => {
       expect(res.body.length).toBe(1);
       expect(res.body[0].name).toBe('Acc User #1');
     }));
+});
+
+test('you must not insert a duplicate account with a duplicate name, for the same user', () => {
+  return app.db('accounts').insert({ name: 'Acc duplicada', user_id: user.id })
+    .then(() => request(app).post(MAIN_ROUTE)
+      .set('Authorization', `bearer ${user.token}`)
+      .send({ name: 'Acc duplicada' })
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('There is already an account with that name');
+      }));
+});
+test('must not return an account from another user', () => {
+  return app.db('accounts')
+    .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+    .then((acc) => request(app).get(`${MAIN_ROUTE}/${acc[0].id}`)
+      .set('Authorization', `bearer ${user.token}`)).then((res) => {
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('This resource does not belong to that user');
+    });
+});
+
+test('Não deve alterar a conta de outro usúario', () => {
+  return app.db('accounts')
+    .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+    .then((acc) => request(app).put(`${MAIN_ROUTE}/${acc[0].id}`)
+      .send({ name: 'Acc duplicada' })
+      .set('Authorization', `bearer ${user.token}`)).then((res) => {
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('This resource does not belong to that user');
+    });
+});
+test('Não deve remover a conta de outro usúario', () => {
+  return app.db('accounts')
+    .insert({ name: 'Acc User #2', user_id: user2.id }, ['id'])
+    .then((acc) => request(app).delete(`${MAIN_ROUTE}/${acc[0].id}`)
+      .set('Authorization', `bearer ${user.token}`)).then((res) => {
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('This resource does not belong to that user');
+    });
 });

@@ -1,7 +1,17 @@
 const express = require('express');
+const ResourceInvalid = require('../errors/ResourceInvalid');
 
 module.exports = (app) => {
   const router = express.Router();
+
+  router.param('id', (req, res, next) => {
+    app.services.account.find({ id: req.params.id })
+      .then((acc) => {
+        if (acc.user_id !== req.user.id) throw new ResourceInvalid();
+        else next();
+      }).catch((err) => next(err));
+  });
+
   router.post('/', (req, res, next) => {
     app.services.account.save({ ...req.body, user_id: req.user.id })
       .then((result) => {
