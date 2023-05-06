@@ -5,8 +5,8 @@ const app = require('../../src/app');
 
 const MAIN_ROUTE = '/v1/accounts';
 let user;
-
-beforeAll(async () => {
+let user2;
+beforeEach(async () => {
   const res = await app.services.user.save({
     name: 'User Account',
     mail: `${Date.now()}@gmail.com`,
@@ -14,13 +14,20 @@ beforeAll(async () => {
   });
   user = { ...res[0] };
   user.token = jwt.encode(user, process.env.SECRET);
+
+  const res2 = await app.services.user.save({
+    name: 'User Account 2',
+    mail: `${Date.now()}@gmail.com`,
+    passwd: '123456',
+  });
+  user2 = { ...res2[0] };
 });
 
 test('You must successfully enter an account', () => {
   return request(app)
     .post(MAIN_ROUTE)
     .set('Authorization', `bearer ${user.token}`)
-    .send({ name: 'Acc #1', user_id: user.id })
+    .send({ name: 'Acc #1' })
     .then((result) => {
       expect(result.status).toBe(201);
       expect(result.body.name).toBe('Acc #1');
@@ -30,14 +37,14 @@ test('you must not enter an account without a name ', () => {
   return request(app)
     .post(MAIN_ROUTE)
     .set('Authorization', `bearer ${user.token}`)
-    .send({ user_id: user.id })
+    .send()
     .then((result) => {
       expect(result.status).toBe(400);
       expect(result.body.error).toBe('Name is a mandatory attribute');
     });
 });
 
-test('Must list all accounts', () => {
+test.skip('Must list all accounts', () => {
   return app.db('accounts').insert({ name: 'Acc list', user_id: user.id })
     .then(() => request(app).get(MAIN_ROUTE)
       .set('Authorization', `bearer ${user.token}`))
@@ -76,4 +83,17 @@ test('Should I remove an account', () => {
     .then((res) => {
       expect(res.status).toBe(204);
     });
+});
+
+test('Deve listar apenas as contas do usuario', () => {
+  return app.db('accounts').insert([
+    { name: 'Acc User #1', user_id: user.id },
+    { name: 'Acc User #2', user_id: user2.id },
+  ]).then(() => request(app).get(MAIN_ROUTE)
+    .set('Authorization', `bearer ${user.token}`)
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].name).toBe('Acc User #1');
+    }));
 });

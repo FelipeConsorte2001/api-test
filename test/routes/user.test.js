@@ -6,6 +6,7 @@ const app = require('../../src/app');
 const MAIN_ROUTE = '/v1/users';
 
 let user;
+
 beforeAll(async () => {
   const res = await app.services.user.save({
     name: 'User Account',
