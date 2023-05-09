@@ -57,6 +57,31 @@ test('You must enter a transaction successfully', () => {
     .then((res) => {
       expect(res.status).toBe(201);
       expect(res.body[0].acc_id).toBe(accUser.id);
+      expect(res.body[0].amnount).toBe('100.00');
+    });
+});
+test('input transaction must be positive', () => {
+  return request(app).post(MAIN_ROUTE)
+    .set('Authorization', `bearer ${user.token}`)
+    .send({
+      description: 'New T', date: new Date(), amnount: -100, type: 'I', acc_id: accUser.id,
+    })
+    .then((res) => {
+      expect(res.status).toBe(201);
+      expect(res.body[0].acc_id).toBe(accUser.id);
+      expect(res.body[0].amnount).toBe('100.00');
+    });
+});
+test('transaction of outputs must be negative', () => {
+  return request(app).post(MAIN_ROUTE)
+    .set('Authorization', `bearer ${user.token}`)
+    .send({
+      description: 'New T', date: new Date(), amnount: 100, type: 'O', acc_id: accUser.id,
+    })
+    .then((res) => {
+      expect(res.status).toBe(201);
+      expect(res.body[0].acc_id).toBe(accUser.id);
+      expect(res.body[0].amnount).toBe('-100.00');
     });
 });
 test('Must return one transaction per ID', () => {

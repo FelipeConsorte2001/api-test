@@ -12,8 +12,12 @@ module.exports = (app) => {
       .first();
   };
   const save = (transaction) => {
+    const newTransaction = { ...transaction };
+    if ((transaction.type === 'I' && transaction.amnount < 0) || (transaction.type === 'O' && transaction.amnount > 0)) {
+      newTransaction.amnount *= -1;
+    }
     return app.db('transactions')
-      .insert(transaction, '*');
+      .insert(newTransaction, '*');
   };
   const update = (id, transactions) => {
     return app.db('transactions').where({ id }).update(transactions, '*');
