@@ -72,3 +72,19 @@ test('Must return one transaction per ID', () => {
       });
   });
 });
+test('Must change one transaction per id', () => {
+  return app.db('transactions').insert({
+    description: 'T PUT', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
+  }, ['id']).then((res) => {
+    request(app).put(`${MAIN_ROUTE}/${res[0].id}`)
+      .set('Authorization', `bearer ${user.token}`)
+      .send({
+        description: 'T PUT', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
+      })
+      .then((result) => {
+        expect(result.status).toBe(200);
+        expect(result.body.id).toBe(res[0].id);
+        expect(result.body.description).toBe('T PUT');
+      });
+  });
+});
