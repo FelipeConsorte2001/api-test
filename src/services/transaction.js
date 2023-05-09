@@ -6,5 +6,9 @@ module.exports = (app) => {
       .andWhere('accounts.user_id', '=', userId)
       .select();
   };
-  return { find };
+  const save = (transaction) => {
+    return app.db('transactions')
+      .insert(transaction, '*');
+  };
+  return { find, save };
 };
