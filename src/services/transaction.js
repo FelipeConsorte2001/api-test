@@ -6,9 +6,14 @@ module.exports = (app) => {
       .andWhere('accounts.user_id', '=', userId)
       .select();
   };
+  const findOne = (filter) => {
+    return app.db('transactions')
+      .where(filter)
+      .first();
+  };
   const save = (transaction) => {
     return app.db('transactions')
       .insert(transaction, '*');
   };
-  return { find, save };
+  return { find, save, findOne };
 };

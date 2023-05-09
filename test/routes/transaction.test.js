@@ -48,7 +48,7 @@ test('Should list only the users transactions', () => {
     }));
 });
 
-test('Deve inserir uma transação com sucesso', () => {
+test('You must enter a transaction successfully', () => {
   return request(app).post(MAIN_ROUTE)
     .set('Authorization', `bearer ${user.token}`)
     .send({
@@ -56,6 +56,19 @@ test('Deve inserir uma transação com sucesso', () => {
     })
     .then((res) => {
       expect(res.status).toBe(201);
-      expect(res.body.acc_id).toBe(accUser.id);
+      expect(res.body[0].acc_id).toBe(accUser.id);
     });
+});
+test('Must return one transaction per ID', () => {
+  return app.db('transactions').insert({
+    description: 'T ID', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
+  }, ['id']).then((res) => {
+    request(app).get(`${MAIN_ROUTE}/${res[0].id}`)
+      .set('Authorization', `bearer ${user.token}`)
+      .then((result) => {
+        expect(result.status).toBe(200);
+        expect(result.body.id).toBe(res[0].id);
+        expect(result.body.description).toBe('T ID');
+      });
+  });
 });
