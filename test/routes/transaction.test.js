@@ -88,14 +88,15 @@ test('Must change one transaction per id', () => {
       });
   });
 });
-test('Must delete one transaction per ID', () => {
+test('must not remove another user\'s transfer', () => {
   return app.db('transactions').insert({
-    description: 'To delete', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
+    description: 'To delete', date: new Date(), amnount: 100, type: 'I', acc_id: accUser2.id,
   }, ['id']).then((res) => {
     request(app).delete(`${MAIN_ROUTE}/${res[0].id}`)
       .set('Authorization', `bearer ${user.token}`)
       .then((result) => {
-        expect(result.status).toBe(204);
+        expect(result.status).toBe(403);
+        expect(result.body.error).toBe('This resource does not belong to that user');
       });
   });
 });
