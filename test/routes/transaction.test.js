@@ -88,3 +88,14 @@ test('Must change one transaction per id', () => {
       });
   });
 });
+test('Must delete one transaction per ID', () => {
+  return app.db('transactions').insert({
+    description: 'To delete', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
+  }, ['id']).then((res) => {
+    request(app).delete(`${MAIN_ROUTE}/${res[0].id}`)
+      .set('Authorization', `bearer ${user.token}`)
+      .then((result) => {
+        expect(result.status).toBe(204);
+      });
+  });
+});
