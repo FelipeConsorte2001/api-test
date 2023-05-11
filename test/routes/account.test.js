@@ -6,7 +6,7 @@ const app = require('../../src/app');
 const MAIN_ROUTE = '/v1/accounts';
 let user;
 let user2;
-beforeEach(async () => {
+beforeAll(async () => {
   const res = await app.services.user.save({
     name: 'User Account',
     mail: `${Date.now()}@gmail.com`,
@@ -85,7 +85,9 @@ test('Should I remove an account', () => {
     });
 });
 
-test('Should list only user accounts', () => {
+test('Should list only user accounts', async () => {
+  await app.db('transactions').del();
+  await app.db('accounts').del();
   return app.db('accounts').insert([
     { name: 'Acc User #1', user_id: user.id },
     { name: 'Acc User #2', user_id: user2.id },

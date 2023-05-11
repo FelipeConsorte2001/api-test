@@ -174,3 +174,15 @@ test('must not remove another user\'s transfer', () => {
       });
   });
 });
+test('must not remove account with transaction', () => {
+  return app.db('transactions').insert({
+    description: 'To delete', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
+  }, ['id']).then(() => {
+    request(app).delete(`/v1/accounts/${accUser.id}`)
+      .set('Authorization', `bearer ${user.token}`)
+      .then((result) => {
+        expect(result.status).toBe(400);
+        expect(result.body.error).toBe('this account has associated tansation');
+      });
+  });
+});
