@@ -97,7 +97,7 @@ test('transaction of outputs must be negative', () => {
     });
 });
 
-describe('Ao tentar inserir uma transação invalida', () => {
+describe('When trying to enter an invalid transaction', () => {
   let validTransaction;
   beforeAll(() => {
     validTransaction = {
