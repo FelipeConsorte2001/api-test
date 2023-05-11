@@ -84,19 +84,55 @@ test('transaction of outputs must be negative', () => {
       expect(res.body[0].amnount).toBe('-100.00');
     });
 });
-test('Must return one transaction per ID', () => {
-  return app.db('transactions').insert({
-    description: 'T ID', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
-  }, ['id']).then((res) => {
-    request(app).get(`${MAIN_ROUTE}/${res[0].id}`)
+test('transaction of outputs must be negative', () => {
+  return request(app).post(MAIN_ROUTE)
+    .set('Authorization', `bearer ${user.token}`)
+    .send({
+      description: 'New T', date: new Date(), amnount: 100, type: 'O', acc_id: accUser.id,
+    })
+    .then((res) => {
+      expect(res.status).toBe(201);
+      expect(res.body[0].acc_id).toBe(accUser.id);
+      expect(res.body[0].amnount).toBe('-100.00');
+    });
+});
+
+describe('Ao tentar inserir uma transação invalida', () => {
+  let validTransaction;
+  beforeAll(() => {
+    validTransaction = {
+      description: 'New T', date: new Date(), amnount: 100, type: 'O', acc_id: accUser.id,
+    };
+  });
+  const testTemplate = (newData, errorMessage) => {
+    return request(app).post(MAIN_ROUTE)
       .set('Authorization', `bearer ${user.token}`)
-      .then((result) => {
-        expect(result.status).toBe(200);
-        expect(result.body.id).toBe(res[0].id);
-        expect(result.body.description).toBe('T ID');
+      .send({ ...validTransaction, ...newData })
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(errorMessage);
+      });
+  };
+  test('you must not enter a non-descript', () => testTemplate({ description: null }, 'description is a mandatory attribute'));
+  test('you must not enter a amount', () => testTemplate({ amnount: null }, 'amount is a mandatory attribute'));
+  test('you must not enter a data', () => testTemplate({ date: null }, 'date is a mandatory attribute'));
+  test('you must not enter a account', () => testTemplate({ acc_id: null }, 'account is a mandatory attribute'));
+  test('you must not enter a type', () => testTemplate({ type: null }, 'type is a mandatory attribute'));
+  test('you must not enter a invalid type', () => testTemplate({ type: 'A' }, 'invalid type'));
+
+  test('you must not enter a amount transaction', () => {
+    return request(app).post(MAIN_ROUTE)
+      .set('Authorization', `bearer ${user.token}`)
+      .send({
+        description: 'New T', date: new Date(), type: 'O', acc_id: accUser.id,
+      })
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('amount is a mandatory attribute');
       });
   });
 });
+
 test('Must change one transaction per id', () => {
   return app.db('transactions').insert({
     description: 'T PUT', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
@@ -110,6 +146,19 @@ test('Must change one transaction per id', () => {
         expect(result.status).toBe(200);
         expect(result.body.id).toBe(res[0].id);
         expect(result.body.description).toBe('T PUT');
+      });
+  });
+});
+test('Must return one transaction per ID', () => {
+  return app.db('transactions').insert({
+    description: 'T ID', date: new Date(), amnount: 100, type: 'I', acc_id: accUser.id,
+  }, ['id']).then((res) => {
+    request(app).get(`${MAIN_ROUTE}/${res[0].id}`)
+      .set('Authorization', `bearer ${user.token}`)
+      .then((result) => {
+        expect(result.status).toBe(200);
+        expect(result.body.id).toBe(res[0].id);
+        expect(result.body.description).toBe('T ID');
       });
   });
 });
