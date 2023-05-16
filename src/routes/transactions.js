@@ -3,39 +3,36 @@ const ResourceInvalid = require('../errors/ResourceInvalid');
 
 module.exports = (app) => {
   const router = express.Router();
-
   router.param('id', (req, res, next) => {
-    app.services.account.find({ id: req.params.id })
-      .then((acc) => {
-        if (acc.user_id !== req.user.id) throw new ResourceInvalid();
-        else next();
+    app.services.transaction.find(req.user.id, { 'transactions.id': req.params.id })
+      .then((result) => {
+        if (result.length > 0) next();
+        else throw new ResourceInvalid();
       }).catch((err) => next(err));
   });
 
-  router.post('/', (req, res, next) => {
-    app.services.account.save({ ...req.body, user_id: req.user.id })
-      .then((result) => {
-        if (result.error) return res.status(400).json(result);
-        return res.status(201).json(result[0]);
-      }).catch((err) => next(err));
-  });
   router.get('/', (req, res, next) => {
-    app.services.account.findAll(req.user.id)
+    app.services.transaction.find(req.user.id)
       .then((result) => res.status(200).json(result))
       .catch((err) => next(err));
   });
+  router.post('/', (req, res, next) => {
+    app.services.transaction.save(req.body)
+      .then((result) => res.status(201).json(result))
+      .catch((err) => next(err));
+  });
   router.get('/:id', (req, res, next) => {
-    app.services.account.find({ id: req.params.id })
+    app.services.transaction.findOne({ id: req.params.id })
       .then((result) => res.status(200).json(result))
       .catch((err) => next(err));
   });
   router.put('/:id', (req, res, next) => {
-    app.services.account.update(req.params.id, req.body)
+    app.services.transaction.update(req.params.id, req.body)
       .then((result) => res.status(200).json(result[0]))
       .catch((err) => next(err));
   });
   router.delete('/:id', (req, res, next) => {
-    app.services.account.remove(req.params.id)
+    app.services.transaction.remove(req.params.id)
       .then(() => res.status(204).send())
       .catch((err) => next(err));
   });
