@@ -37,3 +37,43 @@ test('you must enter a successful transfer', () => {
       expect(transactions[1].acc_id).toBe(10001);
     });
 });
+
+describe('when saving a valid transfer...', () => {
+  let transferId;
+  let inCome;
+  let outCome;
+  test('should return to status 201', () => {
+    return request(app).post(MAIN_ROUTE)
+      .set('authorization', `bearer ${TOKEN}`)
+      .send({
+        description: 'Regular Transfer', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, amnount: 100, date: new Date(),
+      })
+      .then(async (res) => {
+        expect(res.status).toBe(201);
+        expect(res.body.description).toBe('Regular Transfer');
+        transferId = res.body.id;
+      });
+  });
+  test('transactions must have been generated', async () => {
+    const transactions = await app.db('transactions').where({ transfer_id: transferId }).orderBy('amnount');
+    expect(transactions).toHaveLength(2);
+    [outCome, inCome] = transactions;
+  });
+
+  test('the outgoing transaction must be negative', () => {
+    expect(outCome.description).toBe('Transfer to acc #10001');
+    expect(outCome.amnount).toBe('-100.00');
+    expect(outCome.acc_id).toBe(10000);
+    expect(outCome.type).toBe('O');
+  });
+  test('the outgoing transaction must be positive', () => {
+    expect(inCome.description).toBe('Transfer from acc #10000');
+    expect(inCome.amnount).toBe('100.00');
+    expect(inCome.acc_id).toBe(10001);
+    expect(inCome.type).toBe('I');
+  });
+  test('both must be referenced to the transfer that originated them', () => {
+    expect(inCome.transfer_id).toBe(transferId);
+    expect(outCome.transfer_id).toBe(transferId);
+  });
+});
