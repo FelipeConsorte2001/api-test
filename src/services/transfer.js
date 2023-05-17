@@ -1,3 +1,5 @@
+const ValidationError = require('../errors/validationError');
+
 module.exports = (app) => {
   const find = (filter = {}) => {
     return app.db('transfers')
@@ -5,6 +7,16 @@ module.exports = (app) => {
       .select();
   };
   const save = async (transfer) => {
+    if (!transfer.description) throw new ValidationError('description is a mandatory attribute');
+    if (!transfer.amnount) throw new ValidationError('amnount is a mandatory attribute');
+    if (!transfer.date) throw new ValidationError('date is a mandatory attribute');
+    if (!transfer.acc_ori_id) throw new ValidationError('acc_ori is a mandatory attribute');
+    if (!transfer.acc_dest_id) throw new ValidationError('acc_dest is a mandatory attribute');
+    if (transfer.acc_dest_id === transfer.acc_ori_id) throw new ValidationError('it is not possible to transfer from an account to itself');
+    const accounts = await app.db('accounts').whereIn('id', [transfer.acc_dest_id, transfer.acc_ori_id]);
+    accounts.forEach((acc) => {
+      if (acc.user_id !== parseInt(transfer.user_id, 10)) throw new ValidationError(`account #${acc.id} does not belong to user`);
+    });
     const result = await app.db('transfers').insert(transfer, '*');
     const transferId = result[0].id;
 

@@ -77,3 +77,28 @@ describe('when saving a valid transfer...', () => {
     expect(outCome.transfer_id).toBe(transferId);
   });
 });
+
+describe('when trying to save an invalid transfer', () => {
+  const validTransfer = {
+    description: 'Regular Transfer', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, amnount: 100, date: new Date(),
+  };
+  const template = (newData, menssagem) => {
+    return request(app).post(MAIN_ROUTE)
+      .set('authorization', `bearer ${TOKEN}`)
+      .send({
+        ...validTransfer, ...newData,
+      })
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(menssagem);
+      });
+  };
+
+  test('You must not insert without description', () => template({ description: null }, 'description is a mandatory attribute'));
+  test('You must not insert without value', () => template({ amnount: null, description: 'test' }, 'amnount is a mandatory attribute'));
+  test('You must not insert without date', () => template({ date: null }, 'date is a mandatory attribute'));
+  test('Must not insert without source account', () => template({ acc_ori_id: null }, 'acc_ori is a mandatory attribute'));
+  test('You must not insert without target account', () => template({ acc_dest_id: null }, 'acc_dest is a mandatory attribute'));
+  test('You must not enter whether the source and destination accounts should be the same', () => template({ acc_dest_id: 10000 }, 'it is not possible to transfer from an account to itself'));
+  test('Should not insert if the accounts belong to another user', () => template({ acc_ori_id: 10002 }, 'account #10002 does not belong to user'));
+});
