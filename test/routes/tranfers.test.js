@@ -112,7 +112,7 @@ test('Deve retorna a transferencia por ID', () => {
     });
 });
 
-describe('Deve alterar uma transferencia valida...', () => {
+describe('You must change a valid transfer...', () => {
   let transferId;
   let inCome;
   let outCome;
