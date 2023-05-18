@@ -6,7 +6,7 @@ module.exports = (app) => {
       .where(filter)
       .select();
   };
-  const save = async (transfer) => {
+  const validate = async (transfer) => {
     if (!transfer.description) throw new ValidationError('description is a mandatory attribute');
     if (!transfer.amnount) throw new ValidationError('amnount is a mandatory attribute');
     if (!transfer.date) throw new ValidationError('date is a mandatory attribute');
@@ -17,6 +17,8 @@ module.exports = (app) => {
     accounts.forEach((acc) => {
       if (acc.user_id !== parseInt(transfer.user_id, 10)) throw new ValidationError(`account #${acc.id} does not belong to user`);
     });
+  };
+  const save = async (transfer) => {
     const result = await app.db('transfers').insert(transfer, '*');
     const transferId = result[0].id;
 
@@ -54,6 +56,6 @@ module.exports = (app) => {
     return result;
   };
   return {
-    find, save, findOne, update,
+    find, save, findOne, update, validate,
   };
 };
