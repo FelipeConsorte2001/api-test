@@ -102,3 +102,53 @@ describe('when trying to save an invalid transfer', () => {
   test('You must not enter whether the source and destination accounts should be the same', () => template({ acc_dest_id: 10000 }, 'it is not possible to transfer from an account to itself'));
   test('Should not insert if the accounts belong to another user', () => template({ acc_ori_id: 10002 }, 'account #10002 does not belong to user'));
 });
+
+test('Deve retorna a transferencia por ID', () => {
+  return request(app).get(`${MAIN_ROUTE}/10000`)
+    .set('authorization', `bearer ${TOKEN}`)
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.description).toBe('Transfer #1');
+    });
+});
+
+describe('Deve alterar uma transferencia valida...', () => {
+  let transferId;
+  let inCome;
+  let outCome;
+  test('should return to status 200', () => {
+    return request(app).put(`${MAIN_ROUTE}/10000`)
+      .set('authorization', `bearer ${TOKEN}`)
+      .send({
+        description: 'Transfer updated', user_id: 10000, acc_ori_id: 10000, acc_dest_id: 10001, amnount: 500, date: new Date(),
+      })
+      .then(async (res) => {
+        expect(res.status).toBe(200);
+        expect(res.body.description).toBe('Transfer updated');
+        expect(res.body.amnount).toBe('500.00');
+        transferId = res.body.id;
+      });
+  });
+  test('transactions must have been generated', async () => {
+    const transactions = await app.db('transactions').where({ transfer_id: transferId }).orderBy('amnount');
+    expect(transactions).toHaveLength(2);
+    [outCome, inCome] = transactions;
+  });
+
+  test('the outgoing transaction must be negative', () => {
+    expect(outCome.description).toBe('Transfer to acc #10001');
+    expect(outCome.amnount).toBe('-500.00');
+    expect(outCome.acc_id).toBe(10000);
+    expect(outCome.type).toBe('O');
+  });
+  test('the outgoing transaction must be positive', () => {
+    expect(inCome.description).toBe('Transfer from acc #10000');
+    expect(inCome.amnount).toBe('500.00');
+    expect(inCome.acc_id).toBe(10001);
+    expect(inCome.type).toBe('I');
+  });
+  test('both must be referenced to the transfer that originated them', () => {
+    expect(inCome.transfer_id).toBe(transferId);
+    expect(outCome.transfer_id).toBe(transferId);
+  });
+});

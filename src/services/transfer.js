@@ -31,5 +31,29 @@ module.exports = (app) => {
     await app.db('transactions').insert(transaction);
     return result;
   };
-  return { find, save };
+
+  const findOne = (filter = {}) => {
+    return app.db('transfers')
+      .where(filter)
+      .first();
+  };
+  const update = async (id, transfer) => {
+    const result = await app.db('transfers')
+      .where({ id })
+      .update(transfer, '*');
+    const transaction = [
+      {
+        description: `Transfer to acc #${transfer.acc_dest_id}`, date: transfer.date, amnount: transfer.amnount * -1, type: 'O', acc_id: transfer.acc_ori_id, transfer_id: id,
+      },
+      {
+        description: `Transfer from acc #${transfer.acc_ori_id}`, date: transfer.date, amnount: transfer.amnount, type: 'I', acc_id: transfer.acc_dest_id, transfer_id: id,
+      },
+    ];
+    await app.db('transactions').where({ transfer_id: id }).del();
+    await app.db('transactions').insert(transaction);
+    return result;
+  };
+  return {
+    find, save, findOne, update,
+  };
 };
