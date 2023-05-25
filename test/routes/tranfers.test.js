@@ -177,3 +177,27 @@ describe('when trying to update an invalid transfer', () => {
   test('You must not enter whether the source and destination accounts should be the same', () => template({ acc_dest_id: 10000 }, 'it is not possible to transfer from an account to itself'));
   test('Should not insert if the accounts belong to another user', () => template({ acc_ori_id: 10002 }, 'account #10002 does not belong to user'));
 });
+
+describe('When removing a transfer', () => {
+  test('Deve retorna o status 204', () => {
+    return request(app).delete(`${MAIN_ROUTE}/10000`)
+      .set('Authorization', `bearer ${TOKEN}`)
+      .then((res) => {
+        expect(res.status).toBe(204);
+      });
+  });
+
+  test('the record must have been removed from the bank', () => {
+    return app.db('transfers').where({ id: 10000 })
+      .then((result) => {
+        expect(result).toHaveLength(0);
+      });
+  });
+
+  test('The associated transactions must have been remitted as well', () => {
+    return app.db('transactions').where({ transfer_id: 10000 })
+      .then((result) => {
+        expect(result).toHaveLength(0);
+      });
+  });
+});
