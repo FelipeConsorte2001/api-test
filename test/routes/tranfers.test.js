@@ -201,3 +201,12 @@ describe('When removing a transfer', () => {
       });
   });
 });
+
+test('must not return transference from another user', () => {
+  return request(app).get(`${MAIN_ROUTE}/10001`)
+    .set('authorization', `bearer ${TOKEN}`)
+    .then((res) => {
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('This resource does not belong to that user');
+    });
+});
