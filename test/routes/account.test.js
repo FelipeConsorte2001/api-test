@@ -22,7 +22,10 @@ beforeAll(async () => {
   });
   user2 = { ...res2[0] };
 });
-
+// beforeEach(async () => {
+//   await app.db('transactions').del();
+//   await app.db('accounts').del();
+// });
 test('You must successfully enter an account', () => {
   return request(app)
     .post(MAIN_ROUTE)
